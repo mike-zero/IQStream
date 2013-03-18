@@ -1,0 +1,8 @@
+Changes
+IQStream.xs
+Makefile.PL
+MANIFEST
+ppport.h
+README
+t/IQStream.t
+lib/IQStream.pm
