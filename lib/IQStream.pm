@@ -1,6 +1,6 @@
 package IQStream;
 
-use 5.016002;
+use 5.010000;
 use strict;
 use warnings;
 
