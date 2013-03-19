@@ -2,8 +2,6 @@
 #include "perl.h"
 #include "XSUB.h"
 
-//#### include <inttypes.h>
-
 #include "ppport.h"
 
 U8
