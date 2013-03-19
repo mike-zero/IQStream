@@ -18,6 +18,7 @@ IQ_normalize_zero(unsigned char * p, int make_signed)
 	}
 }
 
+/* scale_bits can be set to 0..8 to get better precision */
 U16
 calc_amplitude(U8 i, U8 q, int scale_bits)
 {
