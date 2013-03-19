@@ -54,7 +54,7 @@ my $test = {
 	}
   }, ######################
   'xs-full' => sub {
-		IQStream::Convert_IQ_to_amplitude_buf($buf2, length($buf2));
+		IQStream::Convert_IQ_to_amplitude_buf($buf2, length($buf2), 0);
   }, ######################
 };
 
