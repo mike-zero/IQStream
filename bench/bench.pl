@@ -3,6 +3,7 @@
 use strict;
 use integer;
 
+use lib '../blib/lib', '../blib/arch';
 use IQStream;
 
 use Benchmark qw(:all);
