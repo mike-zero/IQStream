@@ -32,6 +32,8 @@ sub calc_amp($$) {
 	return $amp_cache[$i][$q];
 }
 
+my $strm = new IQStream();
+
 my $test = {
   'perl-0' => sub {
 	foreach my $s (0..(length($buf)/2-1)) {
@@ -55,7 +57,7 @@ my $test = {
 	}
   }, ######################
   'xs-full' => sub {
-		IQStream::Convert_IQ_to_amplitude_buf($buf2, length($buf2), 0);
+		$strm->Convert_IQ_to_amplitude_buf(\$buf2, 0);
   }, ######################
 #  'xs-full-scale' => sub {
 #		IQStream::Convert_IQ_to_amplitude_buf($buf3, length($buf3), 8);
