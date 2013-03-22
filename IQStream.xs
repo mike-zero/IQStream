@@ -33,10 +33,7 @@ calc_amplitude(U8 i, U8 q, int scale_bits)
 }
 
 MODULE = IQStream		PACKAGE = IQStream
-
-TYPEMAP: <<END;
-IQSTREAM	*	T_PTROBJ
-END;
+PROTOTYPES: DISABLE
 
 IQSTREAM *
 make(obj)
@@ -81,4 +78,3 @@ strm_Convert_IQ_to_amplitude_buf(IQSTREAM *stm, unsigned char * buf, int size, i
 		RETVAL = p - buf;
 	OUTPUT:
 		RETVAL
-		

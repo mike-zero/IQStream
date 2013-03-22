@@ -1,0 +1,3 @@
+TYPEMAP
+
+IQSTREAM        *       T_PTROBJ
