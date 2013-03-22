@@ -51,9 +51,7 @@ sub IQ_normalize_zero_buf
 sub Convert_IQ_to_amplitude_buf
 {
 	my ($self, $buf, $scale_bits) = @_;
-	printf("__>\t".('\x%02X' x length($$buf)) ."\n", unpack('C*', $$buf));
 	$self->{'__stream__'}->Convert_IQ_to_amplitude_buf($$buf, length($$buf), $scale_bits);
-	printf("<__\t".('\x%02X' x length($$buf)) ."\n", unpack('C*', $$buf));
 }
 
 1;
