@@ -72,7 +72,7 @@ strm_Convert_IQ_to_amplitude_buf(IQSTREAM *stm, unsigned char * buf, int size, i
 		unsigned char *p;
 		U16 * res;
 		for (p = buf; p - buf < size; p += 2) {
-			res = p;
+			res = (U16 *) p;
 			*res = calc_amplitude(IQ_normalize_zero(p, 0), IQ_normalize_zero(p+1, 0), scale_bits);
 		}
 		RETVAL = p - buf;
