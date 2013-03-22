@@ -16,6 +16,7 @@ map { substr($buf, $_, 1)=chr(rand(256)) } (0..$bufsize-1);
 
 my $buf1 = $buf;
 my $buf2 = $buf;
+my $buf3 = $buf;
 
 my @amp_cache;
 
@@ -56,6 +57,9 @@ my $test = {
   'xs-full' => sub {
 		IQStream::Convert_IQ_to_amplitude_buf($buf2, length($buf2), 0);
   }, ######################
+#  'xs-full-scale' => sub {
+#		IQStream::Convert_IQ_to_amplitude_buf($buf3, length($buf3), 8);
+#  }, ######################
 };
 
 my $count = -2;

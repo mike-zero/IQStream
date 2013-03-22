@@ -4,6 +4,13 @@
 
 #include "ppport.h"
 
+
+typedef struct
+{
+	int		state;
+	SV		*obj;
+} IQSTREAM;
+
 U8
 IQ_normalize_zero(unsigned char * p, int make_signed)
 {
@@ -27,8 +34,32 @@ calc_amplitude(U8 i, U8 q, int scale_bits)
 
 MODULE = IQStream		PACKAGE = IQStream
 
+TYPEMAP: <<END;
+IQSTREAM	*	T_PTROBJ
+END;
+
+IQSTREAM *
+make(obj)
+	SV		*obj;
+CODE:
+	RETVAL = (IQSTREAM*)malloc(sizeof(IQSTREAM));
+	memset(RETVAL, 0, sizeof(IQSTREAM));
+	RETVAL->obj = newSVsv(obj);
+OUTPUT:
+	RETVAL
+
+MODULE = IQStream		PACKAGE = IQSTREAMPtr 	PREFIX = strm_
+
+void
+strm_DESTROY(stm)
+	IQSTREAM	*stm;
+CODE:
+	sv_setsv(stm->obj, 0);
+//	if (stm->buf) free(stm->buf);
+	free(stm);
+
 int
-IQ_normalize_zero_buf(unsigned char * buf, int size, int make_signed)
+strm_IQ_normalize_zero_buf(IQSTREAM	*stm, unsigned char * buf, int size, int make_signed)
 	CODE:
 		unsigned char *p;
 		for (p = buf; p - buf < size; p++) {
@@ -39,9 +70,9 @@ IQ_normalize_zero_buf(unsigned char * buf, int size, int make_signed)
 		RETVAL
 
 int
-Convert_IQ_to_amplitude_buf(char * buf, int size, int scale_bits)
+strm_Convert_IQ_to_amplitude_buf(IQSTREAM *stm, unsigned char * buf, int size, int scale_bits)
 	CODE:
-		char *p;
+		unsigned char *p;
 		U16 * res;
 		for (p = buf; p - buf < size; p += 2) {
 			res = p;
@@ -50,3 +81,4 @@ Convert_IQ_to_amplitude_buf(char * buf, int size, int scale_bits)
 		RETVAL = p - buf;
 	OUTPUT:
 		RETVAL
+		
