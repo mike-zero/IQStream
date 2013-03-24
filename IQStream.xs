@@ -1,13 +1,12 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-
 #include "ppport.h"
-
 
 typedef struct
 {
 	int		state;
+	U16		*amp_cache;
 	SV		*obj;
 } IQSTREAM;
 
@@ -36,8 +35,7 @@ MODULE = IQStream		PACKAGE = IQStream
 PROTOTYPES: DISABLE
 
 IQSTREAM *
-make(obj)
-	SV		*obj;
+make(SV *obj)
 CODE:
 	RETVAL = (IQSTREAM*)malloc(sizeof(IQSTREAM));
 	memset(RETVAL, 0, sizeof(IQSTREAM));
@@ -52,7 +50,7 @@ strm_DESTROY(stm)
 	IQSTREAM	*stm;
 CODE:
 	sv_setsv(stm->obj, 0);
-//	if (stm->buf) free(stm->buf);
+	if (stm->amp_cache) free(stm->amp_cache);
 	free(stm);
 
 int
@@ -76,5 +74,26 @@ strm_Convert_IQ_to_amplitude_buf(IQSTREAM *stm, unsigned char * buf, int size, i
 			*res = calc_amplitude(IQ_normalize_zero(p, 0), IQ_normalize_zero(p+1, 0), scale_bits);
 		}
 		RETVAL = p - buf;
+	OUTPUT:
+		RETVAL
+
+int
+strm_fill_amplitude_cache(IQSTREAM *stm, int scale_bits)
+	CODE:
+		U8 i;
+		U8 q;
+		U8 iz;
+		RETVAL = 1;
+		if (stm->amp_cache) {
+			// add realloc here
+		} else {
+			stm->amp_cache = (U16*)malloc(sizeof(U16) * 0x10000);
+		}
+		for (i = 0; i<0xFF; i++) {
+			iz = IQ_normalize_zero(&i, 0);
+			for (q = 0; q<0xFF; q++) {
+				stm->amp_cache[i + (q<<8)] = calc_amplitude(iz, IQ_normalize_zero(&q, 0), scale_bits);
+			}
+		}
 	OUTPUT:
 		RETVAL
