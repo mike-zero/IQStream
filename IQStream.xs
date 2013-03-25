@@ -6,6 +6,7 @@
 typedef struct
 {
 	int		state;
+	U32		ticks;
 	U16		amp_cache[0x10000];
 	int		scale_bits;
 	SV		*obj;
@@ -30,9 +31,7 @@ U16
 calc_amplitude(U8 i, U8 q, int scale_bits)
 {
 	double offs = 0.5;
-	/* TODO: compensate the lost half-bits here inside pow (in case it will be counted usefull) */
-//	return (U16) sqrt((i * i + q * q) << (scale_bits*2));
-//	return (U16) sqrt(((i+0.5) * (i+0.5) + (q+0.5) * (q+0.5)) * (1 << scale_bits*2));
+//	return (U16) sqrt((i * i + q * q) << (scale_bits*2));	// faster, but little (half a bit) less accurate
 	return (U16) round(sqrt(((i+offs) * (i+offs) + (q+offs) * (q+offs)) * (1 << scale_bits*2)));
 }
 
@@ -108,5 +107,24 @@ strm_Convert_IQ_to_amplitude_buf_cached(IQSTREAM *stm, unsigned char * buf, int 
 			*res = stm->amp_cache[*res];
 		}
 		RETVAL = p - buf;
+	OUTPUT:
+		RETVAL
+
+int
+strm_level_detect(IQSTREAM *stm, unsigned char * buf, int size, U16 threshold)
+	CODE:
+		U16 * p;
+		int new_state;
+		for (p = (U16 *)buf; p - (U16 *)buf < size/2; p++) {
+			// printf("%d\t%8d\t%6d\n", stm->state, stm->ticks, *p);
+			stm->ticks++;
+			new_state = (*p >= threshold) ? 1 : 0;
+			if (new_state != stm->state) {
+				printf("State: %d\t%8d\n", stm->state, stm->ticks);
+				stm->state = new_state;
+				stm->ticks = 0;
+			}
+		}
+		RETVAL = 0;
 	OUTPUT:
 		RETVAL

@@ -32,8 +32,7 @@ XSLoader::load('IQStream', $VERSION);
 
 # Preloaded methods go here.
 
-sub new
-{
+sub new {
 	my $class = shift;
 	my $param = shift;
 	$param = {} unless ref($param) eq 'HASH';
@@ -43,31 +42,31 @@ sub new
 	$self;
 }
 
-sub IQ_normalize_zero_buf
-{
+sub IQ_normalize_zero_buf($$;$) {
 	my ($self, $buf, $make_signed) = @_;
 	$make_signed = 0 unless defined $make_signed;
 	$self->{'__stream__'}->IQ_normalize_zero_buf($$buf, length($$buf), $make_signed);
 }
 
-sub Convert_IQ_to_amplitude_buf
-{
+sub Convert_IQ_to_amplitude_buf($$$) {
 	my ($self, $buf, $scale_bits) = @_;
-	$self->{'__stream__'}->Convert_IQ_to_amplitude_buf($$buf, length($$buf) & ~1, $scale_bits);
+	$self->{'__stream__'}->Convert_IQ_to_amplitude_buf($$buf, length($$buf), $scale_bits);
 }
 
-sub Convert_IQ_to_amplitude_buf_cached
-{
+sub Convert_IQ_to_amplitude_buf_cached($$) {
 	my ($self, $buf) = @_;
-	$self->{'__stream__'}->Convert_IQ_to_amplitude_buf_cached($$buf, length($$buf) & ~1);
+	$self->{'__stream__'}->Convert_IQ_to_amplitude_buf_cached($$buf, length($$buf));
 }
 
-sub fill_amplitude_cache
-{
+sub fill_amplitude_cache($) {
 	my ($self) = @_;
 	$self->{'__stream__'}->fill_amplitude_cache();
 }
 
+sub level_detect($$) {
+	my ($self, $buf, $threshold) = @_;
+	$self->{'__stream__'}->level_detect($$buf, length($$buf), $threshold);
+}
 1;
 
 __END__
