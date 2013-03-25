@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 8;
+use Test::More tests => 10;
 BEGIN { use_ok('IQStream') };
 
 my $strm = new IQStream();
@@ -14,3 +14,11 @@ $buf = "\xB0\xC0\xFF\xFF\x4F\x3F"; $strm->Convert_IQ_to_amplitude_buf(\$buf, 1);
 $buf = "\xB0\xC0\xFF\xFF\x4F\x3F"; $strm->Convert_IQ_to_amplitude_buf(\$buf, 2); is($buf, "\x40\x01\xCE\x02\x40\x01");
 $buf = "\xB0\xC0\xFF\xFF\x4F\x3F"; $strm->Convert_IQ_to_amplitude_buf(\$buf, 4); is($buf, "\x00\x05\x39\x0B\x00\x05");
 $buf = "\xB0\xC0\xFF\xFF\x4F\x3F"; $strm->Convert_IQ_to_amplitude_buf(\$buf, 8); is($buf, "\x00\x50\x9A\xB3\x00\x50");
+
+my $strm1 = new IQStream({'scale_bits' => 8});
+$strm1->fill_amplitude_cache();
+$buf = "\x00\x00\xB0\xC0\xFE\xFE\xFF\xFF\x4F\x3F"; $strm1->Convert_IQ_to_amplitude_buf_cached(\$buf); is($buf, "\x9A\xB3\x00\x50\x30\xB2\x9A\xB3\x00\x50");
+
+my $strm2 = new IQStream({'scale_bits' => 4});
+$strm2->fill_amplitude_cache();
+$buf = "\x00\x00\xB0\xC0\xFE\xFE\xFF\xFF\x4F\x3F"; $strm2->Convert_IQ_to_amplitude_buf_cached(\$buf); is($buf, "\x39\x0B\x00\x05\x23\x0B\x39\x0B\x00\x05");

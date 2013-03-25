@@ -35,21 +35,37 @@ XSLoader::load('IQStream', $VERSION);
 sub new
 {
 	my $class = shift;
+	my $param = shift;
+	$param = {} unless ref($param) eq 'HASH';
+	my $scale_bits = $param->{'scale_bits'} || 8;
 	my $self  = bless { '__stream__' => undef }, $class;
-	$self->{'__stream__'} = make($self);
+	$self->{'__stream__'} = make($self, $scale_bits);
 	$self;
 }
 
 sub IQ_normalize_zero_buf
 {
 	my ($self, $buf, $make_signed) = @_;
+	$make_signed = 0 unless defined $make_signed;
 	$self->{'__stream__'}->IQ_normalize_zero_buf($$buf, length($$buf), $make_signed);
 }
 
 sub Convert_IQ_to_amplitude_buf
 {
 	my ($self, $buf, $scale_bits) = @_;
-	$self->{'__stream__'}->Convert_IQ_to_amplitude_buf($$buf, length($$buf), $scale_bits);
+	$self->{'__stream__'}->Convert_IQ_to_amplitude_buf($$buf, length($$buf) & ~1, $scale_bits);
+}
+
+sub Convert_IQ_to_amplitude_buf_cached
+{
+	my ($self, $buf) = @_;
+	$self->{'__stream__'}->Convert_IQ_to_amplitude_buf_cached($$buf, length($$buf) & ~1);
+}
+
+sub fill_amplitude_cache
+{
+	my ($self) = @_;
+	$self->{'__stream__'}->fill_amplitude_cache();
 }
 
 1;

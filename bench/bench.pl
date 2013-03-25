@@ -14,15 +14,23 @@ my $bufsize = 2 * 16384;
 my $buf = 0 x $bufsize;
 map { substr($buf, $_, 1)=chr(rand(256)) } (0..$bufsize-1);
 
+
 my $buf1 = $buf;
 my $buf2 = $buf;
 my $buf3 = $buf;
 
 my @amp_cache;
+my @precache;
 
 # sub SCALE_BITS() { 8 }
 sub SCALE_BITS() { 0 }
 # sub AVG_FACTOR_BITS() { 2 }
+
+foreach my $i (0..255) {
+	foreach my $q (0..255) {
+		$precache[$i][$q] = int(sqrt(($i*$i+$q*$q) << (SCALE_BITS() * 2)));
+	}
+}
 
 my ($i, $q, $amp);
 
@@ -33,6 +41,8 @@ sub calc_amp($$) {
 }
 
 my $strm = new IQStream();
+my $strm3 = new IQStream({'scale_bits' => SCALE_BITS()});
+$strm3->fill_amplitude_cache();
 
 my $test = {
   'perl-0' => sub {
@@ -45,7 +55,7 @@ my $test = {
 		$amp = calc_amp($i, $q);
 	}
   }, ######################
-  'perl-1' => sub {
+  'pl-1st-use' => sub {
 	foreach my $s (0..(length($buf1)/2-1)) {
 		$i = ord(substr($buf1, $s*2, 1));
 		$q = ord(substr($buf1, $s*2 + 1, 1));
@@ -56,12 +66,27 @@ my $test = {
 		$amp = calc_amp($i, $q) unless defined $amp;
 	}
   }, ######################
-  'xs-full' => sub {
-		$strm->Convert_IQ_to_amplitude_buf(\$buf2, 0);
+  'pl-precache' => sub {
+	foreach my $s (0..(length($buf1)/2-1)) {
+		$i = ord(substr($buf1, $s*2, 1));
+		$q = ord(substr($buf1, $s*2 + 1, 1));
+		# print "$i\t$q\t";
+		$i = $i & 0x80 ? $i & 0x7F : $i ^ 0x7F;
+		$q = $q & 0x80 ? $q & 0x7F : $q ^ 0x7F;
+		$amp = $precache[$i][$q];
+	}
   }, ######################
-#  'xs-full-scale' => sub {
-#		IQStream::Convert_IQ_to_amplitude_buf($buf3, length($buf3), 8);
-#  }, ######################
+  'perl-nop' => sub {
+	foreach my $s (0..(length($buf1)/2-1)) {
+		# do nothing, just run along the string
+	}
+  }, ######################
+  'xs-full' => sub {
+		$strm->Convert_IQ_to_amplitude_buf(\$buf2, SCALE_BITS());
+  }, ######################
+  'xs-cache' => sub {
+		$strm3->Convert_IQ_to_amplitude_buf_cached(\$buf3);
+  }, ######################
 };
 
 my $count = -2;
