@@ -18,7 +18,7 @@ my $strm = new IQStream();
 my $strm1 = new IQStream({'scale_bits' => 8});
 $strm1->fill_amplitude_cache();
 $buf = "\xB0\xC0\xFF\xFF\x4F\x3F"; 
-warn sprintf(("\n".'\x%02X' x length($buf)) ."\n", unpack('C*', $buf));
+warn sprintf(('\x%02X' x length($buf)) ."\n", unpack('C*', $buf));
 $strm1->Convert_IQ_to_amplitude_buf_cached(\$buf);
 warn sprintf(('\x%02X' x length($buf)) ."\n", unpack('C*', $buf));
 

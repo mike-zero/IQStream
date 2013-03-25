@@ -29,11 +29,11 @@ IQ_normalize_zero(unsigned char * p, int make_signed)
 U16
 calc_amplitude(U8 i, U8 q, int scale_bits)
 {
-//	double offs = 0.5;
+	double offs = 0.5;
 	/* TODO: compensate the lost half-bits here inside pow (in case it will be counted usefull) */
-	return (U16) sqrt((i * i + q * q) << (scale_bits*2));
+//	return (U16) sqrt((i * i + q * q) << (scale_bits*2));
 //	return (U16) sqrt(((i+0.5) * (i+0.5) + (q+0.5) * (q+0.5)) * (1 << scale_bits*2));
-//	return (U16) sqrt(((i+offs) * (i+offs) + (q+offs) * (q+offs)) * (1 << scale_bits*2));
+	return (U16) round(sqrt(((i+offs) * (i+offs) + (q+offs) * (q+offs)) * (1 << scale_bits*2)));
 }
 
 MODULE = IQStream		PACKAGE = IQStream
