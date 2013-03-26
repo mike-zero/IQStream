@@ -67,6 +67,12 @@ sub level_detect($$) {
 	my ($self, $buf, $threshold) = @_;
 	$self->{'__stream__'}->level_detect($$buf, length($$buf), $threshold);
 }
+
+sub Impulse
+{
+	1;
+}
+
 1;
 
 __END__

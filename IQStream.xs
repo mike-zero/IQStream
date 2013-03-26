@@ -17,6 +17,35 @@ typedef struct
 	SV		*obj;
 } IQSTREAM;
 
+char _IMPULSE[] = "Impulse";
+
+int call_proc(SV *obj, char *proc_name, char *orig_text, int orig_len, char *tag, int tag_len)
+{
+	int count;
+	int res = 0;
+	dSP;
+	char *txt = (char*)malloc(orig_len + 1);
+	memcpy(txt, orig_text, orig_len);
+	txt[orig_len] = 0;
+	ENTER;
+	SAVETMPS;
+	PUSHMARK(SP);
+	XPUSHs(newSVsv(obj));
+	XPUSHs(sv_2mortal(newSVpvn(txt, orig_len)));
+	XPUSHs(sv_2mortal(newSVpvn(tag, tag_len)));
+	PUTBACK;
+	count = perl_call_method(proc_name, G_SCALAR);
+	SPAGAIN;
+	if (count == 1)
+          res = POPi;
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+	free(txt);
+	return res;
+}
+
+
 U8
 IQ_normalize_zero(unsigned char * p, int make_signed)
 {
@@ -126,7 +155,11 @@ strm_level_detect(IQSTREAM *stm, unsigned char * buf, int size, U16 threshold)
 			new_state = (*(U16*)p >= threshold) ? STATE_HIGH : STATE_LOW;
 			if (new_state != stm->state) {
 				printf("%d %6d ", stm->state, stm->ticks);
-				if (new_state == STATE_HIGH) printf("\n");
+				if (new_state == STATE_HIGH) {
+					printf("\n");
+					// RETVAL = call_proc(stm->obj, _IMPULSE, p, strlen(p), tag, strlen(tag));
+					RETVAL = call_proc(stm->obj, _IMPULSE, "asdf", strlen("asdf"), "qwertyu", strlen("qwertyu"));
+				}
 				stm->state = new_state;
 				stm->ticks = 0;
 			}
