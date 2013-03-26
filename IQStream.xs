@@ -3,6 +3,11 @@
 #include "XSUB.h"
 #include "ppport.h"
 
+#define	STATE_WAIT	0
+#define	STATE_LOW	1
+#define	STATE_HIGH	2
+#define	STATE_FRONT	3
+
 typedef struct
 {
 	int		state;
@@ -45,6 +50,7 @@ CODE:
 	memset(RETVAL, 0, sizeof(IQSTREAM));
 	RETVAL->obj = newSVsv(obj);
 	RETVAL->scale_bits = scale_bits;
+	RETVAL->state = STATE_WAIT;
 OUTPUT:
 	RETVAL
 
@@ -113,14 +119,14 @@ strm_Convert_IQ_to_amplitude_buf_cached(IQSTREAM *stm, unsigned char * buf, int 
 int
 strm_level_detect(IQSTREAM *stm, unsigned char * buf, int size, U16 threshold)
 	CODE:
-		U16 * p;
+		unsigned char* p;
 		int new_state;
-		for (p = (U16 *)buf; p - (U16 *)buf < size/2; p++) {
-			// printf("%d\t%8d\t%6d\n", stm->state, stm->ticks, *p);
+		for (p = buf; p - buf < size; p += 2) {
 			stm->ticks++;
-			new_state = (*p >= threshold) ? 1 : 0;
+			new_state = (*(U16*)p >= threshold) ? STATE_HIGH : STATE_LOW;
 			if (new_state != stm->state) {
-				printf("State: %d\t%8d\n", stm->state, stm->ticks);
+				printf("%d %6d ", stm->state, stm->ticks);
+				if (new_state == STATE_HIGH) printf("\n");
 				stm->state = new_state;
 				stm->ticks = 0;
 			}
