@@ -64,8 +64,8 @@ sub fill_amplitude_cache($) {
 }
 
 sub level_detect($$) {
-	my ($self, $buf, $threshold) = @_;
-	$self->{'__stream__'}->level_detect($$buf, length($$buf), $threshold);
+	my ($self, $buf, $threshold, $reset_ticks) = @_;
+	$self->{'__stream__'}->level_detect($$buf, length($$buf), $threshold, $reset_ticks);
 }
 
 sub Impulse

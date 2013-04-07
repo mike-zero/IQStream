@@ -10,8 +10,26 @@
 
 typedef struct
 {
+	U16		last;
+	U16		min;
+	U16		max;
+	U16		counter;
+	U32		sum;
+/*
+	U16		last = 0;
+	U16		min = 0;
+	U16		max = 0;
+	U16		counter = 0;
+	U32		sum = 0;
+*/
+} level;
+
+typedef struct
+{
 	int		state;
 	U32		ticks;
+	level	*low;
+	level	*high;
 	U16		amp_cache[0x10000];
 	int		scale_bits;
 	SV		*obj;
@@ -45,6 +63,15 @@ int call_proc(SV *obj, char *proc_name, char *orig_text, int orig_len, char *tag
 	return res;
 }
 
+void
+process_value(level *ll, U16 val)
+{
+	ll->last = val;
+	ll->sum += val;
+	if (val < ll->min || ll->counter == 0) ll->min = val;
+	if (val > ll->max) ll->max = val;
+	ll->counter++;
+}
 
 U8
 IQ_normalize_zero(unsigned char * p, int make_signed)
@@ -146,19 +173,44 @@ strm_Convert_IQ_to_amplitude_buf_cached(IQSTREAM *stm, unsigned char * buf, int 
 		RETVAL
 
 int
-strm_level_detect(IQSTREAM *stm, unsigned char * buf, int size, U16 threshold)
+strm_level_detect(IQSTREAM *stm, unsigned char * buf, int size, U16 threshold, int reset_ticks)
 	CODE:
 		unsigned char* p;
 		int new_state;
 		for (p = buf; p - buf < size; p += 2) {
-			stm->ticks++;
-			new_state = (*(U16*)p >= threshold) ? STATE_HIGH : STATE_LOW;
+			switch (stm->state) {
+				case STATE_LOW:
+					stm->ticks++;
+				case STATE_WAIT:
+					if (*(U16*)p >= threshold) {
+					}
+					if (stm->ticks >= reset_ticks) {
+						stm->state = STATE_WAIT;
+						stm->ticks = 0;
+					}
+					break;
+				case STATE_HIGH:
+					break;
+				case STATE_FRONT:
+					break;
+			}
+
+
+
+
+
+
+			if (new_state == stm->state) {
+				if (stm->ticks >= reset_ticks)
+				continue;
+			}
+
 			if (new_state != stm->state) {
 				printf("%d %6d ", stm->state, stm->ticks);
 				if (new_state == STATE_HIGH) {
 					printf("\n");
 					// RETVAL = call_proc(stm->obj, _IMPULSE, p, strlen(p), tag, strlen(tag));
-					RETVAL = call_proc(stm->obj, _IMPULSE, "asdf", strlen("asdf"), "qwertyu", strlen("qwertyu"));
+					// RETVAL = call_proc(stm->obj, _IMPULSE, "asdf", strlen("asdf"), "qwertyu", strlen("qwertyu"));
 				}
 				stm->state = new_state;
 				stm->ticks = 0;
