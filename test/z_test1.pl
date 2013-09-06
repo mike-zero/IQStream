@@ -22,7 +22,8 @@ open F, $filename;
 binmode(F);
 while (sysread(F, $buf, $bufsize)) {
 	$strm1->Convert_IQ_to_amplitude_buf_cached(\$buf);
-	$strm1->level_detect(\$buf, 30000);
+print "---------------------------------\n";
+	$strm1->level_detect(\$buf, 10000);
 #last;
 print "=================================\n";
 }

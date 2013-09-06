@@ -135,11 +135,18 @@ strm_fill_amplitude_cache(IQSTREAM *stm)
 int
 strm_Convert_IQ_to_amplitude_buf_cached(IQSTREAM *stm, unsigned char * buf, int size)
 	CODE:
+		U16	count[0x100];
+		U16 i;
 		unsigned char * p;
 		U16 * res;
+		memset(count, 0, sizeof(count));
 		for (p = buf; p - buf < size; p += 2) {
 			res = (U16 *) p;
 			*res = stm->amp_cache[*res];
+			count[*res >> 8]++;
+		}
+		for (i = 0; i<0x100; i++) {
+			printf(">>> %3d %6u\n", i, count[i]);
 		}
 		RETVAL = p - buf;
 	OUTPUT:
@@ -153,10 +160,11 @@ strm_level_detect(IQSTREAM *stm, unsigned char * buf, int size, U16 threshold)
 		for (p = buf; p - buf < size; p += 2) {
 			stm->ticks++;
 			new_state = (*(U16*)p >= threshold) ? STATE_HIGH : STATE_LOW;
+			printf("%d\t%d\t%d\n", new_state, stm->ticks, *(U16*)p);
 			if (new_state != stm->state) {
-				printf("%d %6d ", stm->state, stm->ticks);
+				printf("\t\t%d %6d \n", stm->state, stm->ticks);
 				if (new_state == STATE_HIGH) {
-					printf("\n");
+//					printf("\n");
 					// RETVAL = call_proc(stm->obj, _IMPULSE, p, strlen(p), tag, strlen(tag));
 					RETVAL = call_proc(stm->obj, _IMPULSE, "asdf", strlen("asdf"), "qwertyu", strlen("qwertyu"));
 				}
