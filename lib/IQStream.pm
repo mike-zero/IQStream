@@ -68,6 +68,11 @@ sub level_detect($$) {
 	$self->{'__stream__'}->level_detect($$buf, length($$buf), $threshold);
 }
 
+sub amp_declick($) {
+	my ($self, $buf) = @_;
+	$self->{'__stream__'}->amp_declick($$buf, length($$buf));
+}
+
 sub Impulse
 {
 	1;

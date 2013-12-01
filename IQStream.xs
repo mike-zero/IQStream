@@ -167,3 +167,40 @@ strm_level_detect(IQSTREAM *stm, unsigned char * buf, int size, U16 threshold)
 		RETVAL = 0;
 	OUTPUT:
 		RETVAL
+
+# will not affect the first and last elements because they do not have both neighbours available. This should be fixed somehow
+int
+strm_amp_declick(IQSTREAM *stm, unsigned char * buf, int size)
+	CODE:
+		unsigned char* p;
+		U16 p_prev;
+		U16 p_next;
+		U16 temp;
+		p_prev = *(U16*)buf;
+		for (p = buf + 2; p - buf < size - 2; p += 2) {
+			p_next = *(U16*)(p+2);
+			if (p_prev >= p_next) {
+				if (*(U16*)p > p_prev) {
+					temp = p_prev;
+					p_prev = *(U16*)p;
+					*(U16*)p = temp;
+				} else if (*(U16*)p < p_next) {
+					p_prev = *(U16*)p;
+					*(U16*)p = p_next;
+				} else {
+					p_prev = *(U16*)p;
+				}
+			} else {
+				if (*(U16*)p < p_prev) {
+					temp = p_prev;
+					p_prev = *(U16*)p;
+					*(U16*)p = temp;
+				} else if (*(U16*)p > p_next) {
+					p_prev = *(U16*)p;
+					*(U16*)p = p_next;
+				}
+			}
+		}
+		RETVAL = 0;
+	OUTPUT:
+		RETVAL
